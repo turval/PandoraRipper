@@ -1,0 +1,18 @@
+{
+  "name": "PandoraRipper",
+  "description": "Pandora stuff",
+  "version": "0.1",
+  "permissions": ["tabs",
+	"webRequest",
+    "webRequestBlocking",
+    "http://*/*",
+    "unlimitedStorage"],
+  "background_page": "background.html",
+  "content_security_policy": "default-src 'self'; connect-src *; media-src *;",
+  "content_scripts": [
+    {
+      "matches": ["http://www.pandora.com/*"],
+      
+      "js": ["jquery-1.7.2.min.js","Spy.js","FileSystem.js","DataSplitter.js","ResourceRequester.js","Content.js"]
+    }]
+}
