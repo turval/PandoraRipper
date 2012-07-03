@@ -13,6 +13,6 @@
     {
       "matches": ["http://www.pandora.com/*"],
       
-      "js": ["jquery-1.7.2.min.js","Spy.js","FileSystem.js","DataSplitter.js","ResourceRequester.js","Content.js"]
+      "js": ["lib/jquery-1.7.2.min.js","content/Spy.js","model/FileSystem.js","content/DataSplitter.js","content/ResourceRequester.js","content/Content.js"]
     }]
 }
