@@ -3,7 +3,6 @@ function Spy() {
         songData : null,
         songLike : null
     };
-    
     var eventDivs = {};
     
     function fireEvent(event, data) {
@@ -39,7 +38,6 @@ function Spy() {
             createEvent(e);
             getEventDiv(e);
         }
-        
     }
     
     $('body').ajaxComplete(function(e, data, request) {
@@ -53,25 +51,7 @@ function Spy() {
                 fireEvent("songLike", params.arg2);
             }
         }
-        
-        
     });
     
     window.spy = [eventTypes, eventDivs];
-    
-    
-    
-    
-    
-  
-
-    
 }  
-    
-    
-    
-    
-    
-    /*
-
-*/

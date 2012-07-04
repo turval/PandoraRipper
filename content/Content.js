@@ -31,9 +31,7 @@ function download(song) {
         port.postMessage({data : null, token : song.token});
         port.disconnect();
    
-        
     }); 
-
 }
 
 var script = document.createElement('script');
@@ -41,11 +39,3 @@ var script = document.createElement('script');
 
 script.appendChild(document.createTextNode('('+ Spy +')();'));
 (document.body || document.head || document.documentElement).appendChild(script);
-
-
-
-
-
-
-
-

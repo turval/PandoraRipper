@@ -36,7 +36,7 @@ FileSystem.prototype.errorHandler = function (e) {
   console.log('Error: ' + msg);
 }
 
-FileSystem.prototype.saveFile = function(filename, blob) {
+FileSystem.prototype.saveFile = function(filename, blob, cb) {
     var self = this;
     this.fs.root.getFile(filename, {create: true, exclusive: true}, function(fileEntry) {
         console.log("got file entry");
@@ -45,8 +45,16 @@ FileSystem.prototype.saveFile = function(filename, blob) {
             console.log(blob);
             writer.write(blob);
             console.log("wrote");
-        }, self.errorHandler);
-    }, this.errorHandler);
+            console.log(fileEntry.toURL());
+            cb(true);
+        }, function(e) {
+            self.errorHandler(e);
+            cb(false);
+        });
+    }, function(e) {
+        self.errorHandler(e);
+        cb(false);
+    });
 }
 
 FileSystem.prototype.getFile = function(filename, callback) {
@@ -80,5 +88,26 @@ FileSystem.prototype.readFile = function(filename, cb) {
 
   });
 
+}
+
+FileSystem.prototype.readDirectory = function(cb) {
+    function toArray(list) {
+        return Array.prototype.slice.call(list || [], 0);
+    }
+    var self = this;
+    var entries = [];
+    var reader = this.fs.root.createReader();
+    
+    var readEntries = function() {
+        reader.readEntries (function(results) {
+        if (!results.length) {
+            cb(entries.sort());
+        } else {
+            entries = entries.concat(toArray(results));
+            readEntries();
+        }
+        }, self.errorHandler);
+    };
+    readEntries(); // Start reading dirs.
 }
   

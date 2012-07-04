@@ -1,20 +1,26 @@
-SongStorage = function() {
-    this.data = {};
-    this.songOrder = [];
+SongStorage = function(persistantData) {
+    this.persistant = persistantData;
+    this.data = this.persistant.get("SongStorage.data", {});
+    this.songOrder = this.persistant.get("SongStorage.songOrder", []);
+    this.mostRecentToken = this.persistant.get("SongStorage.mostRecentToken", null);
 }
 
 SongStorage.prototype.addSongs = function(xml) {
     var json = XMLToJSON($.parseXML(xml));
-    console.log(json);
     var songsArray = json.methodResponse.params.param.value.array.data.value;
-    console.log(songsArray);
-        
+    
     for(var i = 0; i < songsArray.length; i++) {
         var song = new Song(songsArray[i]);
         this.data[song.token] = song;
         this.songOrder.push(song.token);
     }
-    console.log(this.data);
+    this._flush();
+}
+
+SongStorage.prototype._flush = function() {
+    this.persistant.save("SongStorage.data", this.data);
+    this.persistant.save("SongStorage.songOrder", this.songOrder);
+    this.persistant.save("SongStorage.mostRecentToken", this.mostRecentToken);
 }
 
 SongStorage.prototype.setAudioUrl = function(url) {
@@ -22,29 +28,34 @@ SongStorage.prototype.setAudioUrl = function(url) {
         var song = this.data[this.songOrder[i]];
         if(song.audioUrlSource == undefined) {
             var origUrl = song.audioUrl.replace(/&amp;/g,"&");
-            var shortOrig = this.shorten(origUrl);
-            var shortUrl = this.shorten(url);
-            
-            if(shortUrl == shortOrig) {
-                song.audioUrlSource = url;
-                console.log("found Url for song");
-                console.log(song);
+            if(this.setUrlHelper(song, origUrl, url, url, true)) {
+                this.mostRecentToken = song.token;
+                this._flush();
                 break;
-            } else if(shortUrl.length != shortOrig.length) {
-                if(shortUrl.length > shortOrig.length) {
-                    shortUrl = this.shorten(shortUrl);
-                } else if(shortOrig.length > shortUrl.length) {
-                    shortOrig = this.shorten(shortOrig);
-                }
-                if(shortUrl == shortOrig) {
-                    song.audioUrlSource = url;
-                    console.log("found Url for song");
-                    console.log(song);
-                    break;
-                } 
             }
+        } else if(song.audioUrlSource == url) {
+            this.mostRecentToken = song.token;
+            this._flush();
+            break;
         }
+    } 
+}
+
+SongStorage.prototype.setUrlHelper = function (song, origUrl, newUrl, newUnaltered, first) {
+    var shortOrig = this.shorten(origUrl);
+    var shortUrl = this.shorten(newUrl);
+    if(shortUrl == shortOrig) {
+        song.audioUrlSource = newUnaltered;
+        console.log("found Url for song");
+        return true;
+    } else if (first && shortUrl.length != shortOrig.length) {
+        if(shortUrl.length > shortOrig) {
+            return this.setUrlHelper(song, origUrl, shortUrl, newUnaltered, false);
+        } else {
+            return this.setUrlHelper(song, shortOrig, newUrl, newUnaltered, false);
+        }   
     }
+    return false; 
 }
 
 SongStorage.prototype.shorten = function(url) {

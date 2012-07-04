@@ -1,7 +1,6 @@
 var SavedSongs = function(persistantData) {
     this.storage = persistantData;
-    this.savedSongs = this.storage.get("savedSongs");
-    this.savedSongs = this.savedSongs ? this.savedSongs : [];
+    this.savedSongs = this.storage.get("savedSongs", []);
     
 }
 
@@ -26,12 +25,16 @@ SavedSongs.prototype._getIndex = function(token) {
 SavedSongs.prototype.removeByToken = function(token) {
     var index = this._getIndex(token);
     if(index >= 0) {
+        var song = this.savedSongs[index];
         this.savedSongs.splice(index,1);
         this._flush();
+        return song;
     }
+    return null;
 }
 
 SavedSongs.prototype.removeBySong = function(song) {
+    var index = this.savedSongs.indexOf(song);
     this.savedSongs.splice(this.savedSongs.indexOf(song),1);
     this._flush();
 }
@@ -42,6 +45,10 @@ SavedSongs.prototype.getAll = function() {
 
 SavedSongs.prototype.isTokenSaved = function(token) {
     return (this._getIndex(token) >= 0);
+}
+
+SavedSongs.prototype.isFileNameSaved = function(filename) {
+    return this.isTokenSaved(filename.substr(0, filename.length - 4));
 }
 
 

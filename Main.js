@@ -1,60 +1,53 @@
 (function Main() {
 
     var fs = new FileSystem();
-    var rr = ResourceRequester;
-    var ss = new SongStorage();
-    var hs = new HeaderStorage();
-    var savedSongs = new SavedSongs(PersistantData);
-    run(hs, ss);
-    
-    
-    
-    function messageReciever(data, sender, cb) {
-        if(data.type == "songData") {
-            parseSongMeta(data.data, cb);
-        } else if(data.type == "songLike") {
-            downloadSong(data.data, cb);
-        } else if(data.type == "songBlob") {
-            saveSong(data.data);
-        }
-    }
-    
-    function parseSongMeta(data, cb) {
-        ss.addSongs(data);
+    var requester = ResourceRequester;
+    var songStorage = new SongStorage(PersistantData);
+    var headerStorage = new HeaderStorage();
+    //var savedSongs = new SavedSongs(PersistantData);
+    var songs = new SongsController(PersistantData, songStorage);
+    var dispatcher = new Dispatcher(function(){
         
-    }
+        songStorage.addSongs.apply(songStorage, arguments);
+    }, function() {
+        songs.save.apply(songs, arguments);
+    });
+    run(headerStorage, songStorage);
+    var viewer = null;
     
     
-    
-    function downloadSong(songToken, cb) {
-        var song = ss.getSong(songToken);
-        if(song != undefined) {
-            console.log("downloading");
-            cb(song);
-        }  else {
-            console.log("song not found");
+    /** handles opening viewer page **/
+    chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
+        if(viewer != null && viewer.id == tabId) {
+            viewer = null;
         }
-    }
-    
-    
-    chrome.extension.onConnect.addListener(function(port) {
-        var dj = new DataJoiner();
-        port.onMessage.addListener(function(msg) {
-            if(msg.data != null) {
-                dj.add(msg.data);
-            } else {
-                saveSong({token : msg.token, blob : dj.get()});
-            }
-        });
-    
+    });
+    chrome.browserAction.onClicked.addListener(function(tab) {
+        if(viewer == null) {
+            chrome.tabs.create({url : "viewer/index.html"}, function(tab) {
+                viewer = tab;
+            });
+        } else {
+            chrome.tabs.update(viewer.id, {active : true});
+            chrome.windows.update(viewer.windowId, {focused : true});
+        }
     });
     
-    function saveSong(data) {
-        fs.saveFile(data.token + ".m4a", data.blob);
-        savedSongs.save(ss.getSong(data.token));
-    }
     
-    chrome.extension.onMessage.addListener(messageReciever);
+    window.main = {
+        getAllSongs : function() {
+            return songs.getAllMeta.apply(songs, arguments);
+        },
+        getSongFile : function() {
+            return songs.getFile.apply(songs, arguments);
+        },
+        ss : songStorage,
+        hs : headerStorage,
+        songs : songs
+    };
+    
+   
+
     
   
 })();

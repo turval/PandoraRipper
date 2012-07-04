@@ -2,10 +2,10 @@ var PersistantData = {
     save : function(key, obj) {
         localStorage[key] = JSON.stringify(obj);
     },
-    get : function(key) {
+    get : function(key, defaultVal) {
         var val = localStorage[key];
         if(val == undefined || val == null) {
-            return val;
+            return defaultVal;
         } 
         return JSON.parse(val);
     },
