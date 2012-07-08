@@ -1,7 +1,7 @@
 {
   "name": "PandoraRipper",
   "description": "Pandora stuff",
-  "version": "0.1",
+  "version": "0.1.1",
   "permissions": ["tabs",
 	"webRequest",
     "webRequestBlocking",
@@ -19,5 +19,6 @@
         
         "default_title": "PR"      // optional; shown in tooltip
         
-    }
+    },
+    "update_url": "http://turval.github.com/PandoraRipper/updates.xml"
 }

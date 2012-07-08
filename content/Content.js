@@ -9,12 +9,12 @@ var songLike = createEventDiv('songLike');
 
 songData.addEventListener('songData', function() {
     console.log("hear event");
-    chrome.extension.sendMessage({type : "songData", data : songData.innerText});
+    chrome.extension.sendRequest({type : "songData", data : songData.innerText});
 });
 
 songLike.addEventListener("songLike", function() {
     console.log("song liked");
-    chrome.extension.sendMessage({type : "songLike", data : songLike.innerText}, download);
+    chrome.extension.sendRequest({type : "songLike", data : songLike.innerText}, download);
 });
 
 function download(song) {

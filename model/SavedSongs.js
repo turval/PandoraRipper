@@ -33,14 +33,17 @@ SavedSongs.prototype.removeByToken = function(token) {
     return null;
 }
 
-SavedSongs.prototype.removeBySong = function(song) {
-    var index = this.savedSongs.indexOf(song);
-    this.savedSongs.splice(this.savedSongs.indexOf(song),1);
-    this._flush();
-}
-
 SavedSongs.prototype.getAll = function() {
     return this.savedSongs;
+}
+
+SavedSongs.prototype.get = function(token) {
+    for(var i = 0; i < this.savedSongs.length; i++) {
+        if(this.savedSongs[i].token == token) {
+            return this.savedSongs[i];
+        }
+    }
+    return null;
 }
 
 SavedSongs.prototype.isTokenSaved = function(token) {

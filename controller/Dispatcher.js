@@ -1,3 +1,6 @@
+window.onerror = function(errorMsg, url, lineNumber) {
+    console.log(arguments);
+}
 function Dispatcher(songData, songLiked) {
     function messageReciever(data, sender, cb) {
         if(data.type == "songData") {
@@ -7,5 +10,6 @@ function Dispatcher(songData, songLiked) {
         }
     }
     
-    chrome.extension.onMessage.addListener(messageReciever);
+    chrome.extension.onRequest.addListener(messageReciever);
+    
 }

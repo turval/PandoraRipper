@@ -28,15 +28,23 @@ SongsController.prototype = {
         this._fs.saveFile(token + ".m4a", blob, function(re) {
             if(re) {
                 var song = self._songStorage.getSong(token);
+                song.downloaded = false;
+                song.hasFile = true;
                 self._saved.save(song);
                 Events.fire({type : "songSaved", data : song});
             }  
         });
     },
+    _downloaded : function(token) {
+        this._saved.get(token).downloaded = true;
+    },
     remove : function(token) {
         var song = this._saved.removeByToken(token);
         this._fs.removeFile(song.token + ".m4a");
         Events.fire({type : "removedSong", data : song});
+    },
+    removeFile : function(token) {
+        
     },
     getAllMeta : function() {
         return this._saved.getAll();
