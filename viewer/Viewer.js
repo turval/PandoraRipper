@@ -1,9 +1,10 @@
+
 function Viewer() {
     var bg = chrome.extension.getBackgroundPage();
     var main = chrome.extension.getBackgroundPage().main;
     var songs = main.getAllSongs();
     var ul = $("#songs");
-    console.log(songs);
+    lib.log(songs);
     function writeUrl(a) {
         return function(file) {
             a.attr("href",file.toURL());

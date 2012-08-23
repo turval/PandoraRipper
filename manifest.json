@@ -1,23 +1,35 @@
 {
   "name": "PandoraRipper",
   "description": "Pandora stuff",
-  "version": "0.1.1",
+  "version": "0.1.2.1",
+  "manifest_version": 2,
   "permissions": ["tabs",
 	"webRequest",
     "webRequestBlocking",
+    "http://*/*",
     "http://*.pandora.com/*",
+   
     "unlimitedStorage"],
-  "background_page": "background.html",
+  "background": {
+      "page" : "background.html"
+  },
   "content_security_policy": "default-src 'self'; connect-src *; media-src *;",
   "content_scripts": [
     {
       "matches": ["http://www.pandora.com/*"],
       
-      "js": ["lib/jquery-1.7.2.min.js","content/Spy.js","model/FileSystem.js","content/DataSplitter.js","content/ResourceRequester.js","content/Content.js"]
+      "js": ["lib/jquery-1.7.2.min.js",
+             "lib/base.js",
+             "lib/lang.js",
+             "lib/Class.js",
+             "content/Spy.js",
+             "content/DataSplitter.js",
+             "content/ResourceRequester.js",
+             "content/Content.js"]
     }],
     "browser_action": {
         
-        "default_title": "PR"      // optional; shown in tooltip
+        "default_title": "PR"
         
     },
     "update_url": "http://turval.github.com/PandoraRipper/updates.xml"

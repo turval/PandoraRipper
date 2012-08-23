@@ -1,0 +1,101 @@
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <script src="lib/base.js"></script>
+        <script src="lib/lang.js"></script>
+        <script src="lib/Class.js"></script>
+        <script src="lib/jquery-1.7.2.min.js"></script>
+        <script src="model/Config.js"></script>
+        <script src="model/FileSystem.js"></script>
+        
+        <script>
+            var fs = new PandoraRipper.model.FileSystem();
+            if (!window.BlobBuilder && window.WebKitBlobBuilder)
+            window.BlobBuilder = window.WebKitBlobBuilder;
+            var f = null;
+            var blob = null;
+            
+            function setF() {
+                fs.createFile("PandoraRipper.crx", function(fe) { 
+                    
+                    
+                    fe.file(function(fa) {f = fa;
+                        objectURL = window.webkitURL.createObjectURL(fe);
+                    $("a").attr("href", objectURL);
+                    }
+                    
+                
+                
+            )}); 
+                window.addEventListener("dragstart", dragStart, false);
+                document.getElementById("thing").addEventListener("drop", dragEnd, false);
+                
+            }
+            
+            function dragStart(e) {
+                console.log(e);
+                //e.data
+                //e.dataTransfer.setData("application/x-chrome-extension", f);
+                //e.dataTransfer.types = ["Files"];
+                //e.dataTransfer.
+                console.log(e);
+            }
+            
+            function dragEnd(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            
+            
+            function getExtension() {
+                var url = "http://0.0.0.0:8000/PandoraRipper.crx";
+                var xhr = new XMLHttpRequest(); 
+                xhr.responseType = 'arraybuffer';
+
+                xhr.onload = function(e) {
+                    console.log("Recieving File");
+                    console.log(this);
+                    console.log(this.getAllResponseHeaders());
+                    var ua = new Uint8Array(this.response);
+                    var bb = new BlobBuilder();
+                    bb.append(this.response);
+                    console.log(bb.getBlob());
+                    console.log("made UintArray");
+                    var blob = bb.getBlob();
+                    fs.saveFile("PandoraRipper.crx", blob, function(suc) {
+                        console.log("did it work?" + suc);
+                    });
+                }
+    
+                xhr.open('GET', url, true);
+                xhr.send();
+            }
+            
+            
+            
+            
+            
+        
+            
+            
+            
+            
+            
+            
+        </script>
+        
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    </head>
+    <body>
+        <a href="chrome://chrome/extensions/" draggable="true">file</a>
+        <div>TODO write content</div>
+        <div id="thing" style="width:300px; height:200px; border:1px solid #730000;"></div>
+        <input  id="file_input"  type="file" webkitdirectory directory  />
+    </body>
+</html>

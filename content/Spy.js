@@ -1,3 +1,4 @@
+
 function Spy() {
     var eventTypes = {
         songData : null,

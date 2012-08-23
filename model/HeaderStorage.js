@@ -1,43 +1,44 @@
-HeaderStorage = function() {
-    this.requestHeaders = [];
-    this.whiteList = ["Cookie", "Cache-Control","Referer"];
-}
+(function(lib) {
+    var model = lib.extendNamespace("model");
 
-HeaderStorage.prototype.add = function(headers) {
-    //if (this.requestHeaders.length == 0) {
-        headers = headers.clone();
-        for(var i = 0; i < headers.length; i++) {
-            var header = headers[i];
-            if(this.whiteList.indexOf(header.name) >= 0) {
-                this.requestHeaders.push(header);
-            }
-        }
-        this.requestHeaders.push ({name : "Cache-Control", value : "max-age=3600"});
-        console.log("saved headers");
-        console.log(this.requestHeaders);
-    //}
+
+    model.HeaderStorage = lib.Class.extend({
+        Static : function() {
     
-}
+            this.requestHeaders = {};
+            this.whiteList = ["Cookie", "Cache-Control","Referer"];
+        },
 
-HeaderStorage.prototype.get = function() {
-    return this.requestHeaders.clone();
-}
+        add : function(headers) {
+            headers = headers.libClone();
+            for(var i = 0; i < headers.length; i++) {
+                var header = headers[i];
+                if(this.whiteList.indexOf(header.name) >= 0) {
+                    this.requestHeaders[header.name] = header.value;
+                }
+            }
+            lib.log("saved headers");
+            lib.log(this.requestHeaders);
+        },
 
-HeaderStorage.prototype.hasHeader = function(headers, name) {
-    for(var i = 0; i < headers.length; i++) {
-        if(headers[i].name == name) {
-            return true;
-        }
-    }
-    return false;
-}
-
-Object.prototype.clone = function() {
-  var newObj = (this instanceof Array) ? [] : {};
-  for (i in this) {
-    if (i == 'clone') continue;
-    if (this[i] && typeof this[i] == "object") {
-      newObj[i] = this[i].clone();
-    } else newObj[i] = this[i]
-  } return newObj;
-}
+        get : function() {
+            var headers = [];
+            for (var i in this.requestHeaders) {
+                if(this.requestHeaders.hasOwnProperty(i)) {
+                    headers.push({name : i,
+                                  value : this.requestHeaders[i]});
+                }
+            }
+            return headers;
+        },
+        
+        hasHeader : function(headers, name) {
+            for(var i = 0; i < headers.length; i++) {
+                if(headers[i].name == name) {
+                    return true;
+                }
+            }
+            return false;
+        }    
+    });
+})(PandoraRipper);

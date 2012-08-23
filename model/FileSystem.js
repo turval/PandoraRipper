@@ -1,113 +1,124 @@
-function FileSystem() {
-    var self = this;
-    //window.webkitStorageInfo.requestQuota(PERSISTENT, 1024*1024, function(grantedBytes) {
-        window.webkitRequestFileSystem(PERSISTENT, 1024*1024*200, function(fs){
-            self.fs = fs;
-        }, this.errorHandler);
-    //}, function(e) {
-     //   console.log('Error', e);
-    //});
-}
+(function(lib) {
+    var model = lib.extendNamespace("model");
+    model.FileSystem = lib.Class.extend({
+        Static : function() {
+            var self = this;
+            window.webkitRequestFileSystem(TEMPORARY, 1024*1024*200, function(fs){
+                self.fs = fs;
+            }, this.errorHandler);
+        },
 
-FileSystem.prototype.errorHandler = function (e) {
-  var msg = '';
+        errorHandler : function (e) {
+            var msg = '';
 
-  switch (e.code) {
-    case FileError.QUOTA_EXCEEDED_ERR:
-      msg = 'QUOTA_EXCEEDED_ERR';
-      break;
-    case FileError.NOT_FOUND_ERR:
-      msg = 'NOT_FOUND_ERR';
-      break;
-    case FileError.SECURITY_ERR:
-      msg = 'SECURITY_ERR';
-      break;
-    case FileError.INVALID_MODIFICATION_ERR:
-      msg = 'INVALID_MODIFICATION_ERR';
-      break;
-    case FileError.INVALID_STATE_ERR:
-      msg = 'INVALID_STATE_ERR';
-      break;
-    default:
-      msg = 'Unknown Error';
-      break;
-  };
+            switch (e.code) {
+                case FileError.QUOTA_EXCEEDED_ERR:
+                    msg = 'QUOTA_EXCEEDED_ERR';
+                    break;
+                case FileError.NOT_FOUND_ERR:
+                    msg = 'NOT_FOUND_ERR';
+                    break;
+                case FileError.SECURITY_ERR:
+                    msg = 'SECURITY_ERR';
+                    break;
+                case FileError.INVALID_MODIFICATION_ERR:
+                    msg = 'INVALID_MODIFICATION_ERR';
+                    break;
+                case FileError.INVALID_STATE_ERR:
+                    msg = 'INVALID_STATE_ERR';
+                    break;
+                default:
+                    msg = 'Unknown Error';
+                    break;
+            };
+            new lib.controller.Logger().error({
+                msg : "FileSystemError: " + msg
+            });
+            lib.log('Error: ' + msg);
+        },
 
-  console.log('Error: ' + msg);
-}
+        saveFile : function(filename, blob, cb) {
+            var self = this;
+            this.fs.root.getFile(filename, {
+                create: true, 
+                exclusive: true
+            }, function(fileEntry) {
+                lib.log("got file entry");
+                fileEntry.createWriter(function(writer){
+                    lib.log("writing");
+                    lib.log(blob);
+                    writer.write(blob);
+                    lib.log("wrote");
+                    lib.log(fileEntry.toURL());
+                    cb(true);
+                }, function(e) {
+                    self.errorHandler(e);
+                    cb(false);
+                });
+            }, function(e) {
+                self.errorHandler(e);
+                cb(false);
+            });
+        },
 
-FileSystem.prototype.saveFile = function(filename, blob, cb) {
-    var self = this;
-    this.fs.root.getFile(filename, {create: true, exclusive: true}, function(fileEntry) {
-        console.log("got file entry");
-        fileEntry.createWriter(function(writer){
-            console.log("writing");
-            console.log(blob);
-            writer.write(blob);
-            console.log("wrote");
-            console.log(fileEntry.toURL());
-            cb(true);
-        }, function(e) {
-            self.errorHandler(e);
-            cb(false);
-        });
-    }, function(e) {
-        self.errorHandler(e);
-        cb(false);
-    });
-}
+        getFile : function(filename, callback) {
+            this.fs.root.getFile(filename, {}, callback);
+        },
 
-FileSystem.prototype.getFile = function(filename, callback) {
-    this.fs.root.getFile(filename, {}, callback);
-}
+        removeFile : function(filename) {
+            this.fs.root.getFile(filename, {
+                create: false
+            }, function(fileEntry) {
 
-FileSystem.prototype.removeFile = function(filename) {
-    this.fs.root.getFile(filename, {create: false}, function(fileEntry) {
+                fileEntry.remove(function() {
+                    lib.log('File removed.');
+                }, self.errorHandler);
 
-    fileEntry.remove(function() {
-      console.log('File removed.');
-    }, self.errorHandler);
+            }, self.errorHandler);
+        },
+        
+        createFile : function(filename, callback) {
+            this.fs.root.getFile(filename, {create : true}, callback);
+        },
+        readFile : function(filename, cb) {
+            this.fs.root.getFile(filename, {}, function(fileEntry) {
 
-  }, self.errorHandler);
-}
+                // Get a File object representing the file,
+                // then use FileReader to read its contents.
+                fileEntry.file(function(file) {
+                    var reader = new FileReader();
 
-FileSystem.prototype.readFile = function(filename, cb) {
-    this.fs.root.getFile(filename, {}, function(fileEntry) {
+                    reader.onloadend = function(e) {
+                        cb(this.result);
+                    };
 
-    // Get a File object representing the file,
-    // then use FileReader to read its contents.
-    fileEntry.file(function(file) {
-       var reader = new FileReader();
+                    reader.readAsText(file);
+                });
 
-       reader.onloadend = function(e) {
-         cb(this.result);
-       };
+            });
 
-       reader.readAsText(file);
-    });
+        },
 
-  });
-
-}
-
-FileSystem.prototype.readDirectory = function(cb) {
-    function toArray(list) {
-        return Array.prototype.slice.call(list || [], 0);
-    }
-    var self = this;
-    var entries = [];
-    var reader = this.fs.root.createReader();
+        readDirectory : function(cb) {
+            function toArray(list) {
+                return Array.prototype.slice.call(list || [], 0);
+            }
+            var self = this;
+            var entries = [];
+            var reader = this.fs.root.createReader();
     
-    var readEntries = function() {
-        reader.readEntries (function(results) {
-        if (!results.length) {
-            cb(entries.sort());
-        } else {
-            entries = entries.concat(toArray(results));
-            readEntries();
+            var readEntries = function() {
+                reader.readEntries (function(results) {
+                    if (!results.length) {
+                        cb(entries.sort());
+                    } else {
+                        entries = entries.concat(toArray(results));
+                        readEntries();
+                    }
+                }, self.errorHandler);
+            };
+            readEntries(); // Start reading dirs.
         }
-        }, self.errorHandler);
-    };
-    readEntries(); // Start reading dirs.
-}
+    });
+})(PandoraRipper);
   
