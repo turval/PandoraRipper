@@ -4,7 +4,7 @@
     controller.Logger = lib.Class.extend({
         Static : function(sysInfo) {
             this.data = lib.model.PersistantData;
-            this.queue = [];
+            this.queue = this.data.get("Logger", []);
             this.sys = new lib.model.System();
             var props = this.sys.getProperties()
             if(props.install) {
@@ -12,7 +12,12 @@
             } else if(props.upgrade) {
                 this.upgrade();
             }
-            this.timeout = null;
+            var minutes = 600000; // 10 min
+            minutes = 6000;
+            var self = this;
+            /*this.timeout = setInterval(function() {
+                self._sendLogs();
+            }, minutes);*/
         },
 
         install : function() {
@@ -29,10 +34,20 @@
         
         error : function(error) {
             this._log("error", error);
-            this._sendLogs();
         },
+		
+		caughtError : function(msg, contextData, error) {
+			this._log("caughtError", {msg : msg,
+									  context : contextData,
+									  error : error});
+		},
         
         _log : function(type, data) {
+			if(!lib.model.Config.log) {
+				lib.log(type);
+				lib.log(data);
+				return;
+			}
             if(data === undefined) {
                 data = null;
             }
@@ -42,14 +57,11 @@
             if(this.queue.length > 100) {
                 this.queue.splice(0, this.queue.length - 100);
             }
-            this._sendLogs();
+            this.data.save("Logger", this.queue);
         },
 
         _sendLogs : function() {
-            if(this.timeout) {
-                clearTimeout(this.timeout);
-                this.timeout = null;
-            }
+            if(this.queue.length === 0) return;
             var endIndex = this.queue.length;
             var self = this;
             this._withLogTimes();
@@ -71,11 +83,8 @@
         },
 
         _sendFailed : function(endIndex) {
-            var self = this;
-            var minutes = 600000; // 10 min
-            this.timeout = setTimeout(function() {
-                self._sendLogs();
-            }, minutes);
+            lib.log("send failed");
+            
         },
 
         _sendCompleted : function(endIndex) {

@@ -14,13 +14,31 @@
         },
 
         addSongs : function(xml) {
+            lib.log("adding songs");
             var json = XMLToJSON($.parseXML(xml));
-            var songsArray = json.methodResponse.params.param.value.array.data.value;
-
+            var songsArray = [];
+            try {
+                songsArray = json.methodResponse.params.param.value.array.data.value;
+            } catch(e) {
+                new lib.controller.Logger().caughtError("Failure getting songs from XML",
+                    json, e);
+            }
             for(var i = 0; i < songsArray.length; i++) {
-                var song = new Song(songsArray[i]);
-                this.data[song.token] = song;
+                var song = new model.Song(songsArray[i]);
+                if(this.data[song.token] !== undefined) {
+                    this.data.splice(this.data.indexOf(song.token), 1);
+                } else {
+                    this.data[song.token] = song;
+                }
                 this.songOrder.push(song.token);
+            }
+			
+            if(this.songOrder.length > 100) {
+                var numToRemove = this.songOrder.length - 100;
+                var deadTokens = this.songOrder.splice(0, numToRemove);
+                for(var x = 0; x < deadTokens.length; x++) {
+                    delete this.data[deadTokens[x]];
+                }
             }
             this._flush();
         },
@@ -37,7 +55,7 @@
                 var song = this.data[this.songOrder[i]];
                 if(song.audioUrlSource == undefined) {
                     var origUrl = song.audioUrl.replace(/&amp;/g,"&");
-                    if(this.setUrlHelper(song, origUrl, url, url, true)) {
+                    if(this.setUrlHelper(song, origUrl, url, url)) {
                         this.mostRecentToken = song.token;
                         this._flush();
                         set = true;
@@ -53,18 +71,22 @@
             return set;
         },
 
-        setUrlHelper : function (song, origUrl, newUrl, newUnaltered, first) {
+        setUrlHelper : function (song, origUrl, newUrl, newUnaltered, count) {
+            if(count === undefined) {
+                count = 0;
+            }
             var shortOrig = this.shorten(origUrl);
             var shortUrl = this.shorten(newUrl);
             if(shortUrl == shortOrig) {
                 song.audioUrlSource = newUnaltered;
                 lib.log("found Url for song");
+                lib.log(song);
                 return true;
-            } else if (first && shortUrl.length != shortOrig.length) {
+            } else if (count < 2 && shortUrl.length != shortOrig.length) {
                 if(shortUrl.length > shortOrig) {
-                    return this.setUrlHelper(song, origUrl, shortUrl, newUnaltered, false);
+                    return this.setUrlHelper(song, origUrl, shortUrl, newUnaltered, ++count);
                 } else {
-                    return this.setUrlHelper(song, shortOrig, newUrl, newUnaltered, false);
+                    return this.setUrlHelper(song, shortOrig, newUrl, newUnaltered, ++count);
                 }   
             }
             return false; 

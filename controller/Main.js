@@ -5,7 +5,8 @@
     
     controller.Main = lib.Class.extend({
         Static : function() {
-
+			new controller.Logger();
+            new controller.ErrorHandler();
             var fs = new lib.model.FileSystem();
             var songStorage = new lib.model.SongStorage();
             var headerStorage = new lib.model.HeaderStorage();
@@ -54,6 +55,7 @@
                 hs : headerStorage,
                 songs : songs
             };
+			lib.log("finished main init");
         }
     }); 
     

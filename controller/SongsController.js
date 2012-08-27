@@ -3,9 +3,9 @@
 
 
     controller.SongsController = lib.Class.extend({
-        Static : function (songStorage) {
+        Static : function () {
             this._fs = new lib.model.FileSystem();
-            this._songStorage = songStorage;
+            this._songStorage = new lib.model.SongStorage();
             this._saved = new lib.model.SavedSongs();
             var self = this;
             chrome.extension.onConnect.addListener(function(port) {
@@ -22,9 +22,13 @@
         
         matchAudioUrl : function(url) {
             if(!new lib.model.SongStorage().setAudioUrl(url)) {
-                lib.log("song failed tp match : " + url);
+                lib.log("song failed to match : " + url);
                 var ss = new lib.model.SongStorage();
-                new controller.Logger().unidentifiedSong(url, ss.debug_getSongs(), new lib.model.HeaderStorage().get());
+                var logger = new controller.Logger();
+                var songs = ss.debug_getSongs();
+                var headerStorage = new lib.model.HeaderStorage();
+                var headers = headerStorage.get();
+                logger.unidentifiedSong(url, songs, headers);
             }
         },
 

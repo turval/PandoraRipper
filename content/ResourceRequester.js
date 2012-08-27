@@ -14,9 +14,9 @@
                     lib.log(this);
                     lib.log(this.getAllResponseHeaders());
                     var ua = new Uint8Array(this.response);
-                    var bb = new BlobBuilder();
-                    bb.append(this.response);
-                    lib.log(bb.getBlob());
+                    //var bb = new BlobBuilder();
+                    //bb.append(this.response);
+                    //lib.log(bb.getBlob());
                     lib.log("made UintArray");
                     callback(ua);
                 }
@@ -26,7 +26,7 @@
                 xhr.send();
             }
         }
-    });
+    })();
 
 })(PandoraRipper);
 

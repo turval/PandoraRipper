@@ -6,7 +6,7 @@
         Static : function() {
             var data = lib.model.PersistantData;
             var preVal = data.get("system", {});
-            lib.log(preVal);
+            //lib.log(preVal);
             var reVal = {
                 version : lib.manifest.version,
                 previousVersion : preVal.version !== undefined && 
@@ -15,7 +15,7 @@
                 chromeUserAgent : navigator.userAgent 
             };
             data.save("system", reVal);
-            if(preVal.version !== undefined) {
+            if(preVal.version === undefined) {
                 reVal.install = true;
             }
             if(preVal.version !== reVal.version) {

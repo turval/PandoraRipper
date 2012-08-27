@@ -6,8 +6,9 @@
         Static : function() {
             var self = this;
             this.hs = new lib.model.HeaderStorage();
+            this.sc = new controller.SongsController();
             chrome.webRequest.onBeforeSendHeaders.addListener(function(args) {
-                this.beforeSendHeaders.call(self, args);
+                self.beforeSendHeaders(args);
             },
             {urls : [
                 //"http://*/*",
@@ -16,7 +17,7 @@
             ["blocking","requestHeaders"]);
             
             chrome.webRequest.onHeadersReceived.addListener(function(args) {
-                this.onHeadersReceived.call(self, args);
+                self.onHeadersRecieved(args);
             },
             {urls: [
                 "http://*.pandora.com/access/*"
@@ -35,13 +36,13 @@
                 return {requestHeaders : this.hs.get()};
             } else {
                 this.hs.add(headers);
-                controller.SongsController.matchAudioUrl(details.url);
+                this.sc.matchAudioUrl(details.url);
                 return {requestHeaders : this.hs.get()};
             }
         },
         
         onHeadersRecieved : function(details){
-            var headers = details.responseHeaders.libClone();
+            var headers = lib.clone(details.responseHeaders);
             var newHeaders = [{name : "Cache-Control", value : "max-age=3600"},
                 {name : "Pragma" , value : ""},
                 {name : "Expires" , value : ""}];

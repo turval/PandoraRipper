@@ -1,7 +1,7 @@
 {
   "name": "PandoraRipper",
   "description": "Pandora stuff",
-  "version": "0.1.2.1",
+  "version": "0.1.2.2",
   "manifest_version": 2,
   "permissions": ["tabs",
 	"webRequest",
@@ -22,6 +22,7 @@
              "lib/base.js",
              "lib/lang.js",
              "lib/Class.js",
+             "model/Config.js",
              "content/Spy.js",
              "content/DataSplitter.js",
              "content/ResourceRequester.js",

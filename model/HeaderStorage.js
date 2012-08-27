@@ -10,7 +10,7 @@
         },
 
         add : function(headers) {
-            headers = headers.libClone();
+            headers = lib.clone(headers);
             for(var i = 0; i < headers.length; i++) {
                 var header = headers[i];
                 if(this.whiteList.indexOf(header.name) >= 0) {

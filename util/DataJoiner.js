@@ -3,15 +3,15 @@
     
     util.DataJoiner = lib.Class.extend({
         init : function() {
-            this.builder = new BlobBuilder();
+            this.parts = [];
         },
     
         add : function(array) {
-            this.builder.append(new Uint8Array(array).buffer);
+            this.parts.push(new Uint8Array(array));
         },
 
         get : function() {
-            return this.builder.getBlob();
+            return new Blob(this.parts);
         }
     });
 })(PandoraRipper);

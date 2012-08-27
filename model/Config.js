@@ -2,6 +2,7 @@
     var model = lib.extendNamespace("model");
     lib.model.Config = {
         logUrl : "http://localhost:5000",
-        debug : true
+        debug : true,
+		log : false
     };
 })(PandoraRipper);

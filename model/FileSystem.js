@@ -3,7 +3,7 @@
     model.FileSystem = lib.Class.extend({
         Static : function() {
             var self = this;
-            window.webkitRequestFileSystem(TEMPORARY, 1024*1024*200, function(fs){
+            window.webkitRequestFileSystem(PERSISTENT, 1024*1024*200, function(fs){
                 self.fs = fs;
             }, this.errorHandler);
         },
