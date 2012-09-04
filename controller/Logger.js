@@ -13,11 +13,10 @@
                 this.upgrade();
             }
             var minutes = 600000; // 10 min
-            minutes = 6000;
             var self = this;
-            /*this.timeout = setInterval(function() {
+            this.timeout = setInterval(function() {
                 self._sendLogs();
-            }, minutes);*/
+            }, minutes);
         },
 
         install : function() {
