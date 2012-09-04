@@ -54,7 +54,6 @@
                 }
             }
         });
-        debugger;
         window.spy = [eventTypes, eventDivs];
     };
 })(PandoraRipper);

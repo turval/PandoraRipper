@@ -1,7 +1,7 @@
 {
   "name": "PandoraRipper",
   "description": "Pandora stuff",
-  "version": "0.1.2.3",
+  "version": "0.2",
   "manifest_version": 2,
   "permissions": ["tabs",
 	"webRequest",
@@ -29,8 +29,8 @@
              "content/Content.js"]
     }],
     "browser_action": {
-        
-        "default_title": "PR"
+        "default_icon" : "img/browser_action.png",
+        "default_title": "Pandora Ripper"
         
     },
     "update_url": "http://turval.github.com/PandoraRipper/updates.xml"
