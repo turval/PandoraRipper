@@ -1,12 +1,12 @@
 {
   "name": "PandoraRipper",
   "description": "Pandora stuff",
-  "version": "0.2",
+  "version": "0.2.0.1",
   "manifest_version": 2,
   "permissions": ["tabs",
 	"webRequest",
     "webRequestBlocking",
-    "http://*/*",
+    "http://*.herokuapp.com/*",
     "http://*.pandora.com/*",
    
     "unlimitedStorage"],
