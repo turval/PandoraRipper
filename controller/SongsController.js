@@ -8,6 +8,9 @@
             this._songStorage = new lib.model.SongStorage();
             this._saved = new lib.model.SavedSongs();
             var self = this;
+            setTimeout(function() {
+                self.purge();
+            },1000);
             chrome.extension.onConnect.addListener(function(port) {
                 var dj = new lib.util.DataJoiner();
                 port.onMessage.addListener(function(msg) {
@@ -34,7 +37,7 @@
 
         save : function(token, cb) {
             var song = this._songStorage.getSong(token);
-            if(song && song.audioUrlSource) {
+            if(song && song.audioUrlSource && !song.hasFile) {
                 cb(song);
             }
         },
@@ -43,9 +46,11 @@
             this._fs.saveFile(token + ".m4a", blob, function(re) {
                 if(re) {
                     var song = self._songStorage.getSong(token);
-                    song.downloaded = false;
-                    song.hasFile = true;
-                    self._saved.save(song);
+                    song.set({
+                        downloaded : false,
+                        hasFile : true
+                    });
+                    self._saved.save(song.token);
                     Events.fire({
                         type : "songSaved", 
                         data : song
@@ -54,18 +59,14 @@
             });
         },
         _downloaded : function(token) {
-            this._saved.get(token).downloaded = true;
+            this._saved.get(token).set("downloaded", true);
         },
         remove : function(token) {
-            var song = this._saved.removeByToken(token);
-            this._fs.removeFile(song.token + ".m4a");
-            Events.fire({
-                type : "removedSong", 
-                data : song
-            });
+            this._saved.removeByToken(token);
+            this._fs.removeFile(token + ".m4a");
         },
         removeFile : function(token) {
-        
+            this._fs.removeFile(token + ".m4a");
         },
         getAllMeta : function() {
             return this._saved.getAll();
@@ -75,6 +76,7 @@
         },
         purge : function() {
             var self = this;
+            new lib.model.Songs().purge();
             this._fs.readDirectory(function(entries) {
                 var total = 0;
                 for(var i = 0; i < entries.length; i++) {

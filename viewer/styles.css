@@ -1,0 +1,44 @@
+html {
+    background:#a1a1a1;
+}
+
+body {
+    font-family:"Arial";
+    background:#fff;
+    margin:20px;
+    padding:20px;
+}
+
+li {
+    padding:10px 0;
+    border-bottom:1px solid #999999;
+    padding-bottom:20px;
+    margin-bottom:20px;
+}
+
+.name {
+    padding:5px 0;
+    display:block;
+    font-size : 16px;
+    color:#333333;
+}
+
+.artist {
+    padding-bottom:10px;
+    display:block;
+    font-size : 14px;
+    color:#666666;
+}
+
+a {
+    font-size:14px;
+}
+
+.delete {
+    margin-left:10px;
+    border-left:1px solid #999999;
+    padding-left:10px;
+    color:blue;
+    text-decoration:underline;
+    cursor:pointer;
+}

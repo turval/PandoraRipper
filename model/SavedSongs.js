@@ -2,61 +2,45 @@
     var model = lib.extendNamespace("model");
     
     /**
-     * stores song objects for songs the user has downloaded
+     * stores tokens for songs the user has downloaded
      */
     model.SavedSongs = lib.Class.extend({
         Static : function() {
+            this.songs = new model.Songs();
             this.storage = model.PersistantData;
             this.savedSongs = this.storage.get("savedSongs", []);
-    
+            // register ownerhsip over songs
+            this.songs.getMany(this.savedSongs, this);
         },
-
         _flush : function() {
             this.storage.save("savedSongs", this.savedSongs);
         },
-
-        save : function(song) {
-            this.savedSongs.push(song);
+        save : function(token) {
+            this.songs.get(token, this);
+            this.savedSongs.push(token);
             this._flush();
         },
-
         _getIndex : function(token) {
-            for(var i = 0; i < this.savedSongs.length; i++) {
-                if(this.savedSongs[i].token == token) {
-                    return i;
-                }
-            }
-            return -1;
+            return this.savedSongs.indexOf(token);
         },
-
         removeByToken : function(token) {
             var index = this._getIndex(token);
             if(index >= 0) {
-                var song = this.savedSongs[index];
                 this.savedSongs.splice(index,1);
                 this._flush();
-                return song;
+                this.songs.remove(token, this);
             }
-            return null;
-        },
 
+        },
         getAll : function() {
-            return this.savedSongs;
+            return this.songs.getMany(this.savedSongs, this);
         },
-
         get : function(token) {
-            for(var i = 0; i < this.savedSongs.length; i++) {
-                if(this.savedSongs[i].token == token) {
-                    return this.savedSongs[i];
-                }
-            }
-            return null;
+            return this.songs.get(token, this);
         },
-
         isTokenSaved : function(token) {
             return (this._getIndex(token) >= 0);
         },
-
         isFileNameSaved : function(filename) {
             return this.isTokenSaved(filename.substr(0, filename.length - 4));
         }

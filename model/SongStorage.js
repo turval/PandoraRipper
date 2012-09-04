@@ -8,9 +8,12 @@
     model.SongStorage = lib.Class.extend({
         Static : function() {
             this.persistant = model.PersistantData;
-            this.data = this.persistant.get("SongStorage.data", {});
+            this.songs = new model.Songs();
+            //this.data = this.persistant.get("SongStorage.data", {});
             this.songOrder = this.persistant.get("SongStorage.songOrder", []);
             this.mostRecentToken = this.persistant.get("SongStorage.mostRecentToken", null);
+            // register ownership over songs
+            this.songs.getMany(this.songOrder, this);
         },
 
         addSongs : function(xml) {
@@ -25,26 +28,19 @@
             }
             for(var i = 0; i < songsArray.length; i++) {
                 var song = new model.Song(songsArray[i]);
-                if(this.data[song.token] !== undefined) {
-                    this.data.splice(this.data.indexOf(song.token), 1);
-                } else {
-                    this.data[song.token] = song;
-                }
+                this.songs.add(song, this);
                 this.songOrder.push(song.token);
             }
 			
             if(this.songOrder.length > 100) {
                 var numToRemove = this.songOrder.length - 100;
                 var deadTokens = this.songOrder.splice(0, numToRemove);
-                for(var x = 0; x < deadTokens.length; x++) {
-                    delete this.data[deadTokens[x]];
-                }
+                this.songs.removeMany(deadTokens, this);
             }
             this._flush();
         },
 
         _flush : function() {
-            this.persistant.save("SongStorage.data", this.data);
             this.persistant.save("SongStorage.songOrder", this.songOrder);
             this.persistant.save("SongStorage.mostRecentToken", this.mostRecentToken);
         },
@@ -52,8 +48,8 @@
         setAudioUrl : function(url) {
             var set = false;
             for(var i = this.songOrder.length - 1; i >= 0; i--) {
-                var song = this.data[this.songOrder[i]];
-                if(song.audioUrlSource == undefined) {
+                var song = this.songs.get(this.songOrder[i], this);
+                if(song.audioUrlSource === undefined) {
                     var origUrl = song.audioUrl.replace(/&amp;/g,"&");
                     if(this.setUrlHelper(song, origUrl, url, url)) {
                         this.mostRecentToken = song.token;
@@ -61,7 +57,7 @@
                         set = true;
                         break;
                     }
-                } else if(song.audioUrlSource == url) {
+                } else if(song.audioUrlSource === url) {
                     this.mostRecentToken = song.token;
                     this._flush();
                     set = true;
@@ -78,12 +74,12 @@
             var shortOrig = this.shorten(origUrl);
             var shortUrl = this.shorten(newUrl);
             if(shortUrl == shortOrig) {
-                song.audioUrlSource = newUnaltered;
+                song.set("audioUrlSource", newUnaltered);
                 lib.log("found Url for song");
                 lib.log(song);
                 return true;
             } else if (count < 2 && shortUrl.length != shortOrig.length) {
-                if(shortUrl.length > shortOrig) {
+                if(shortUrl.length > shortOrig.length) {
                     return this.setUrlHelper(song, origUrl, shortUrl, newUnaltered, ++count);
                 } else {
                     return this.setUrlHelper(song, shortOrig, newUrl, newUnaltered, ++count);
@@ -97,7 +93,7 @@
         },
 
         getSong : function(token) {
-            return this.data[token];
+            return this.songs.get(token, this);
         },
         
         debug_getSongs : function() {

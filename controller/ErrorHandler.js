@@ -12,6 +12,7 @@
                url : url,
                line : lineNumber
            });
+           return true;
        }
     });
 })(PandoraRipper);

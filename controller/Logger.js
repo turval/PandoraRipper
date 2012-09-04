@@ -36,18 +36,20 @@
             this._log("error", error);
         },
 		
-		caughtError : function(msg, contextData, error) {
-			this._log("caughtError", {msg : msg,
-									  context : contextData,
-									  error : error});
-		},
+        caughtError : function(msg, contextData, error) {
+            this._log("caughtError", {
+                msg : msg,
+                context : contextData,
+                error : error
+            });
+        },
         
         _log : function(type, data) {
-			if(!lib.model.Config.log) {
-				lib.log(type);
-				lib.log(data);
-				return;
-			}
+            if(!lib.model.Config.log) {
+                lib.log(type);
+                lib.log(data);
+                return;
+            }
             if(data === undefined) {
                 data = null;
             }
