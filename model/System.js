@@ -19,7 +19,7 @@
             if(preVal.version === undefined) {
                 reVal.install = true;
             }
-            if(preVal.version !== reVal.version) {
+            if(!reVal.install && preVal.version !== reVal.version) {
                 reVal.upgrade = true;
             }
             this.properties = reVal;
