@@ -90,6 +90,7 @@
 
         _sendCompleted : function(endIndex) {
             this.queue.splice(0, endIndex);
+            this.data.save("Logger", this.queue);
         },
 
         _withLogTimes : function() {
