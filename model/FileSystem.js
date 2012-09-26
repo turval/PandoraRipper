@@ -48,6 +48,10 @@
             lib.log('Error: ' + msg);
         },
 
+        saveFile : function() {
+            this._factory("_saveFile", arguments);
+        },
+
         _saveFile : function(filename, blob, cb) {
             var self = this;
             this.fs.root.getFile(filename, {
@@ -72,8 +76,17 @@
             });
         },
 
+        getFile : function() {
+            this._factory("_getFile", arguments);
+    
+        },
+
         _getFile : function(filename, callback) {
             this.fs.root.getFile(filename, {}, callback);
+        },
+
+        removeFile : function() {
+            this._factory("_removeFile", arguments);
         },
 
         _removeFile : function(filename) {
@@ -88,8 +101,15 @@
             }, self.errorHandler);
         },
         
+        createFile : function() {
+            this._factory("_createFile", arguments);
+        },
+
         _createFile : function(filename, callback) {
             this.fs.root.getFile(filename, {create : true}, callback);
+        },
+        readFile : function() {
+            this._factory("_readFile", arguments);
         },
         _readFile : function(filename, cb) {
             this.fs.root.getFile(filename, {}, function(fileEntry) {
@@ -111,9 +131,8 @@
         },
 
         readDirectory : function() {
-            if(this.fsSet) {
-                this._readDirectory.call(this, arguments);
-            }
+            this._factory("_readDirectory", arguments);
+        },
 
         _readDirectory : function(cb) {
             function toArray(list) {
@@ -138,7 +157,7 @@
 
         _factory : function(name, args) {
             if(this.fsSet) {
-                this[name].call(this, args);
+                this[name].apply(this, args);
             } else {
                 var self = this;
                 this.calls.push(function() {

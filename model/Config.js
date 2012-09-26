@@ -3,6 +3,6 @@
     lib.model.Config = {
         logUrl : "http://damp-temple-2638.herokuapp.com/",
         debug : false, // enables lib.log
-        log : true //enables logger
+        log : true//enables logger
     };
 })(PandoraRipper);
