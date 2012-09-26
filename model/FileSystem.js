@@ -3,9 +3,20 @@
     model.FileSystem = lib.Class.extend({
         Static : function() {
             var self = this;
+            this.calls = [];
+            this.fsSet = false;
             window.webkitRequestFileSystem(PERSISTENT, 1024*1024*200, function(fs){
                 self.fs = fs;
+                self.fsSet = true;
+                self.runCalls(); 
             }, this.errorHandler);
+        },
+
+        runCalls : function() {
+            for (var i = 0; i < this.calls.length; i++) {
+                this.calls[i]();
+            }
+            this.calls = null;
         },
 
         errorHandler : function (e) {
@@ -37,7 +48,7 @@
             lib.log('Error: ' + msg);
         },
 
-        saveFile : function(filename, blob, cb) {
+        _saveFile : function(filename, blob, cb) {
             var self = this;
             this.fs.root.getFile(filename, {
                 create: true, 
@@ -61,11 +72,11 @@
             });
         },
 
-        getFile : function(filename, callback) {
+        _getFile : function(filename, callback) {
             this.fs.root.getFile(filename, {}, callback);
         },
 
-        removeFile : function(filename) {
+        _removeFile : function(filename) {
             this.fs.root.getFile(filename, {
                 create: false
             }, function(fileEntry) {
@@ -77,10 +88,10 @@
             }, self.errorHandler);
         },
         
-        createFile : function(filename, callback) {
+        _createFile : function(filename, callback) {
             this.fs.root.getFile(filename, {create : true}, callback);
         },
-        readFile : function(filename, cb) {
+        _readFile : function(filename, cb) {
             this.fs.root.getFile(filename, {}, function(fileEntry) {
 
                 // Get a File object representing the file,
@@ -99,7 +110,12 @@
 
         },
 
-        readDirectory : function(cb) {
+        readDirectory : function() {
+            if(this.fsSet) {
+                this._readDirectory.call(this, arguments);
+            }
+
+        _readDirectory : function(cb) {
             function toArray(list) {
                 return Array.prototype.slice.call(list || [], 0);
             }
@@ -118,7 +134,17 @@
                 }, self.errorHandler);
             };
             readEntries(); // Start reading dirs.
+        },
+
+        _factory : function(name, args) {
+            if(this.fsSet) {
+                this[name].call(this, args);
+            } else {
+                var self = this;
+                this.calls.push(function() {
+                    this[name].apply(this, args);
+                });
+            }
         }
     });
 })(PandoraRipper);
-  
