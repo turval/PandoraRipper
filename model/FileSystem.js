@@ -161,7 +161,7 @@
             } else {
                 var self = this;
                 this.calls.push(function() {
-                    this[name].apply(this, args);
+                    self[name].apply(self, args);
                 });
             }
         }

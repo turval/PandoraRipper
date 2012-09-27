@@ -1,7 +1,7 @@
 {
   "name": "PandoraRipper",
   "description": "Pandora stuff",
-  "version": "0.2.0.5",
+  "version": "0.2.0.6",
   "manifest_version": 2,
   "permissions": ["tabs",
 	"webRequest",
